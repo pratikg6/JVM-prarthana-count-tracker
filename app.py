@@ -61,7 +61,7 @@ def data():
             data[date].loc[0]=date
         
         
-        namelist=data.Name.unique().tolist()
+        namelist=data['Mobile Number'].unique().tolist()
         name=form_data['Name']        
         match={}
         count=form_data['Count']
