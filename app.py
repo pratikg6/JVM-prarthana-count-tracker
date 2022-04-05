@@ -66,7 +66,7 @@ def data():
         match={}
         count=form_data['Count']
         for n in namelist:
-            temp=fuzz.ratio(name,n)
+            temp=fuzz.ratio(str(name),str(n))
             match[n]=temp    
         perfect= max(match, key=match.get)
         length=len(data)
