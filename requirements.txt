@@ -1,4 +1,5 @@
 pandas
+itsdangerous
 Jinja2==3.0.0
 gspread_formatting==1.0.6
 Flask==1.1.2
