@@ -13,6 +13,7 @@ from datetime import datetime
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from flask import Flask,render_template,request
+from gspread_dataframe import get_as_dataframe, set_with_dataframe
 
 
 
@@ -31,123 +32,69 @@ def data():
         form_data = request.form
         
         print(form_data)
+
         date=datetime.today().strftime('%d-%m-%Y')
         scope = [
             'https://www.googleapis.com/auth/drive',
             'https://www.googleapis.com/auth/drive.file'
             ]
         file_name = 'credentials.json'
-        
-        
-        
-        
         gc = gspread.service_account(filename='credentials.json')
         sh = gc.open_by_key("1CWgx1CQhkaS7fvt7zQBVsDpNA6QiYfViA711yoQZAJc") # or by sheet name: gc.open("TestList")
-        
-        
-        name=form_data['Name']
-        count=form_data['Count']
-        
+                        
         worksheet = sh.sheet1
+
+
+        df = get_as_dataframe(worksheet, parse_dates=True, skiprows=0, header=None)
+        data=df.dropna(axis = 1, how ='all')
+        data=data.dropna(axis = 0, how ='all')
+        
+        data=data.fillna(0)
         
         
-        ### retrieve data ###
-        #res = worksheet.get_all_records() # list of dictionaries
-        res = worksheet.get_all_values() # list of lists
-        
-        
-        data=pd.DataFrame(res)
         
         lastdate=data.loc[0].tolist()[-1]
         data.columns = data.iloc[0]
-        #data=data.iloc[1: , :]
-        #date='05-04-2022'
+        
         if date!=lastdate:
             data[date]=''
             data[date].loc[0]=date
         
         
         namelist=data.Name.unique().tolist()
-        
-        
+        name=form_data['Name']        
         match={}
+        count=form_data['Count']
         for n in namelist:
-            if name in namelist:
-                temp=fuzz.partial_ratio(name,n)
-                match[n]=temp    
-            else:
-                pass
-            
-        perfect=max(match, key= lambda x: match[x])
-        if match[perfect]<70:
-            data.loc[data['Name']==name,date]=count
+            temp=fuzz.ratio(name,n)
+            match[n]=temp    
+        perfect= max(match, key=match.get)
+        length=len(data)
+        if name not in namelist and match[perfect]<75:
+            data.loc[length, 'Mobile Number'] = name
+            data.loc[length, 'Serial Number'] = length+1
+            data.loc[data['Mobile Number']==name,date]=count
+            total=data[data['Mobile Number']==name].iloc[0].tolist()
         else:
-            data.loc[data['Name']==perfect,date]=count
+            data.loc[data['Mobile Number']==perfect,date]=count
+            total=data[data['Mobile Number']==perfect].iloc[0].tolist()
+            
         
-        worksheet.clear()
+        data=data.fillna(0)
         
-        worksheet.update([data.columns.tolist()] + data.values.tolist())
-      
         
-        return render_template('data.html',form_data = form_data)
+        set_with_dataframe(worksheet, data,include_column_header=False)
+        
+        todaysum=data[date].loc[1:].astype(int).sum()
+
+        
+        total=total[4 :]
+        total=[int(x) for x in total]
+        total=sum(total)
+
+        
+        
+        return render_template('data.html',form_data = form_data, value=todaysum, total=total)
  
 
-app.run(host='localhost', port=5000,debug=True)
-
-"""
-date=datetime.today().strftime('%d-%m-%Y')
-scope = [
-    'https://www.googleapis.com/auth/drive',
-    'https://www.googleapis.com/auth/drive.file'
-    ]
-file_name = 'credentials.json'
-
-
-
-
-gc = gspread.service_account(filename='credentials.json')
-sh = gc.open_by_key("1CWgx1CQhkaS7fvt7zQBVsDpNA6QiYfViA711yoQZAJc") # or by sheet name: gc.open("TestList")
-
-
-name='maruti kasture'
-count=40
-
-worksheet = sh.sheet1
-
-
-### retrieve data ###
-#res = worksheet.get_all_records() # list of dictionaries
-res = worksheet.get_all_values() # list of lists
-
-
-data=pd.DataFrame(res)
-
-lastdate=data.loc[0].tolist()[-1]
-data.columns = data.iloc[0]
-#data=data.iloc[1: , :]
-if date!=lastdate:
-    data[date]=''
-    data[date].loc[0]=date
-
-
-namelist=data.Name.unique().tolist()
-
-
-match={}
-for n in namelist:    
-    temp=fuzz.partial_ratio(name,n)
-    match[n]=temp    
-    
-perfect=max(match, key= lambda x: match[x])
-if match[perfect]<70:
-    data.loc[data['Name']==name,date]=count
-else:
-    data.loc[data['Name']==perfect,date]=count
-
-worksheet.clear()
-
-worksheet.update([data.columns.values.tolist()] + data.values.tolist())
-
-#AIzaSyDaaYjZ3iT6A97uiLEjGOGRY_2ZmkeXzEU
-
-"""
+app.run(host='0.0.0.0', port=80,debug=True)
