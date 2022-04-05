@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<meta name=”viewport” content=”width=device-width, initial-scale=1.5">
+<link rel="stylesheet" href="static/style.css">
+
+<body>
+
+<div class="container">
+
+{% for key,value in form_data.items() %}
+<h2> {{key}}</h2>
+<p> {{value}}</p>
+{% endfor %}
+
+<p> Prarthana count submitted </p>
+<h2> Total prarthanas done by all today are {{value}} </h2>
+<h2> your total prarthana till date - {{total}} </h2>
+
+
+</div>
+</body>
+</html>
