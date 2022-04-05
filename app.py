@@ -20,7 +20,7 @@ from gspread_dataframe import get_as_dataframe, set_with_dataframe
 
 app = Flask(__name__)
  
-@app.route('/form')
+@app.route('/')
 def form():
     return render_template('form.html')
  
