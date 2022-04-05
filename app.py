@@ -96,5 +96,5 @@ def data():
         
         return render_template('data.html',form_data = form_data, value=todaysum, total=total)
  
-
-app.run(host='0.0.0.0', port=80,debug=True)
+if __name__=='__main__':
+ app.run(debug=True)
