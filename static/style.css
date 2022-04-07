@@ -15,9 +15,9 @@ body {
 }
 
 .container {
-  position: relative;
+  position: auto;
   width: 450px;
-  height: 600px;
+  height: 700px;
   border-radius: 20px;
   padding: 40px;
   box-sizing: border-box;
