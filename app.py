@@ -69,7 +69,7 @@ def data():
             temp=fuzz.ratio(str(name),str(n))
             match[n]=temp    
         perfect= max(match, key=match.get)
-        length=len(data)
+        length=0
         if name not in namelist and match[perfect]<75:
             data.loc[length, 'Mobile Number'] = name
             data.loc[length, 'Serial Number'] = length+1
