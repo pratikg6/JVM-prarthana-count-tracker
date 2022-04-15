@@ -45,7 +45,7 @@ def data():
         worksheet = sh.sheet1
 
 
-        df = get_as_dataframe(worksheet, parse_dates=True, skiprows=0, header=None)
+        df = get_as_dataframe(worksheet, parse_dates=True, skiprows=1, header=1)
         data=df.dropna(axis = 1, how ='all')
         data=data.dropna(axis = 0, how ='all')
         
